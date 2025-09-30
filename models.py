@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field, EmailStr, validator
+import hashlib
 
 class SurveySubmission(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
@@ -10,6 +11,7 @@ class SurveySubmission(BaseModel):
     rating: int = Field(..., ge=1, le=5)
     comments: Optional[str] = Field(None, max_length=1000)
     user_agent: Optional[str] = None
+    submission_id: Optional[str] = None
 
     @validator("comments")
     def _strip_comments(cls, v):
@@ -21,8 +23,15 @@ class SurveySubmission(BaseModel):
             raise ValueError("consent must be true")
         return v
 
-# Good example of inheritance
-class StoredSurveyRecord(SurveySubmission):
+class StoredSurveyRecord(BaseModel):
+    name: str
+    email_hash: str
+    age_hash: str
+    consent: bool
+    rating: int
+    comments: Optional[str]
+    user_agent: Optional[str]
+    submission_id: str
     received_at: datetime
     ip: str
 
